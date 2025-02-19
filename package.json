@@ -10,7 +10,9 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "dotenv": "^16.4.7",
     "electron": "^34.2.0",
+    "electron-packager": "^17.1.2",
     "ws": "^8.18.0"
   }
 }

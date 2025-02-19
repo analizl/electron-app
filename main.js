@@ -1,5 +1,11 @@
 const { app, BrowserWindow, screen } = require("electron")
 const WebSocket = require("ws")
+require('dotenv').config()
+
+app.setLoginItemSettings({
+  openAtLogin: true, // Inicia la app al inicio de windows
+  path: app.getPath('exe')
+})
 
 let windows = {}
 let wss
@@ -11,7 +17,7 @@ app.whenReady().then(() => {
 })
 
 function createWebSocketClient(displays) {
-  wsClient = new WebSocket("ws://srdapp.diagnosis.local:3001")
+  wsClient = new WebSocket(process.env.WS_CLIENT)
 
   wsClient.on("open", () => {
     console.log("Conexión WebSocket abierta")

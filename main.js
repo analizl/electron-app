@@ -17,34 +17,53 @@ app.whenReady().then(() => {
 })
 
 function createWebSocketClient(displays) {
-  wsClient = new WebSocket(process.env.WS_CLIENT)
+  const WS_URL = process.env.WS_CLIENT
+  let reconnectInterval = 5000 // Tiempo de espera antes de intentar reconectar
+  let reconnectTimeout
+  
+  wsClient = new WebSocket(WS_URL)
 
-  wsClient.on("open", () => {
-    console.log("Conexión WebSocket abierta")
-  })
+  function connect() {
+    wsClient = new WebSocket(WS_URL)
 
-  wsClient.on("error", (error) => {
-    console.error("Error de conexión WebSocket:", error)
-  })
+    wsClient.on("open", () => {
+      console.log("Conexión WebSocket abierta")
+      clearTimeout(reconnectTimeout) // Si se reconectó, cancelar el intento de reconexión
+    })
 
-  wsClient.on("close", () => {
-    console.log("Conexión WebSocket cerrada")
-  })
+    wsClient.on("error", (error) => {
+      console.error("Error de conexión WebSocket:", error)
+    })
 
-  wsClient.on("message", (message) => {
-    try {
-      const data = JSON.parse(message)
-      console.log("Mensaje recibido en Electron:", data)
+    wsClient.on("close", () => {
+      console.log("Conexión WebSocket cerrada. Intentando reconectar en", reconnectInterval / 1000, "segundos...")
+      scheduleReconnect()
+    })
 
-      if (data.action === "open") {
-        openMultipleWindows(data.urls, wsClient, displays)
-      } else if (data.action === "close") {
-        closeWindowById(data.windowId)
+    wsClient.on("message", (message) => {
+      try {
+        const data = JSON.parse(message)
+        console.log("Mensaje recibido en Electron:", data)
+
+        if (data.action === "open") {
+          openMultipleWindows(data.urls, wsClient, displays)
+        } else if (data.action === "close") {
+          closeWindowById(data.windowId)
+        }
+      } catch (error) {
+        console.error("Error al procesar mensaje WebSocket:", error)
       }
-    } catch (error) {
-      console.error("Error al procesar mensaje WebSocket:", error)
-    }
-  })
+    })
+  }
+
+  function scheduleReconnect() {
+    reconnectTimeout = setTimeout(() => {
+      console.log("Intentando reconectar WebSocket...")
+      connect()
+    }, reconnectInterval)
+  }
+
+  connect()
 }
 
 function openMultipleWindows(urls, ws, displays) {

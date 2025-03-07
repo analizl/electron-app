@@ -12,7 +12,7 @@ This project is an application built with [Electron](https://www.electronjs.org/
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/your-username/your-repository.git
+   git clone https://github.com/analizl/electron-app.git
    cd your-repository
    ```
 2. Install the required dependencies:

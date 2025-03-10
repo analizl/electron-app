@@ -1,9 +1,26 @@
 const { app, BrowserWindow, screen } = require("electron")
 const WebSocket = require("ws")
 require('dotenv').config()
-
 const os = require("os")
-const userId = os.hostname()
+
+function getLocalIP() {
+  const interfaces = os.networkInterfaces()
+  let localIP = ''
+
+  for (const interfaceName in interfaces) {
+    for (const net of interfaces[interfaceName]) {
+      if (net.family === 'IPv4' && !net.internal) {
+        localIP = net.address
+        break
+      }
+    }
+    if (localIP) break
+  }
+
+  return localIP
+}
+
+const userId = getLocalIP()
 
 app.setLoginItemSettings({
   openAtLogin: true, // Inicia la app al inicio de windows
@@ -31,7 +48,7 @@ function createWebSocketClient(displays) {
 
     wsClient.on("open", () => {
       console.log("Conexión WebSocket abierta", userId)
-      wsClient.send(JSON.stringify({ action: "register" }))
+      wsClient.send(JSON.stringify({ action: "register", userId }))
       clearTimeout(reconnectTimeout) // Si se reconectó, cancelar el intento de reconexión
     })
 

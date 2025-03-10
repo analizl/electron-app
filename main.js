@@ -2,6 +2,9 @@ const { app, BrowserWindow, screen } = require("electron")
 const WebSocket = require("ws")
 require('dotenv').config()
 
+const os = require("os")
+const userId = os.hostname()
+
 app.setLoginItemSettings({
   openAtLogin: true, // Inicia la app al inicio de windows
   path: app.getPath('exe')
@@ -27,7 +30,8 @@ function createWebSocketClient(displays) {
     wsClient = new WebSocket(WS_URL)
 
     wsClient.on("open", () => {
-      console.log("Conexión WebSocket abierta")
+      console.log("Conexión WebSocket abierta", userId)
+      wsClient.send(JSON.stringify({ action: "register" }))
       clearTimeout(reconnectTimeout) // Si se reconectó, cancelar el intento de reconexión
     })
 
@@ -56,7 +60,16 @@ function createWebSocketClient(displays) {
     })
   }
 
+  let reconnectAttempts = 0
+  const maxReconnectAttempts = 10
+
   function scheduleReconnect() {
+    if (reconnectAttempts >= maxReconnectAttempts) {
+      console.error("Número máximo de intentos de reconexión alcanzado")
+      return
+    }
+    reconnectAttempts++
+
     reconnectTimeout = setTimeout(() => {
       console.log("Intentando reconectar WebSocket...")
       connect()

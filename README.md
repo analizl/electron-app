@@ -13,7 +13,7 @@ This project is an application built with [Electron](https://www.electronjs.org/
 1. Clone this repository:
    ```bash
    git clone https://github.com/analizl/electron-app.git
-   cd your-repository
+   cd electron-app
    ```
 2. Install the required dependencies:
    ```bash
@@ -49,5 +49,4 @@ npx electron-packager . executable-name --platform=win32 --arch=x64
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
 

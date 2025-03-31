@@ -31,18 +31,27 @@ let windows = {}
 let wss
 let wsClient
 
-app.whenReady().then(() => {
-  const displays = screen.getAllDisplays()
-  createWebSocketClient(displays)
-})
+// Permitir solo una instancia de la aplicación
+const gotTheLock = app.requestSingleInstanceLock()
+
+if (!gotTheLock) {
+  app.quit() // Si ya hay una instancia, cerrar esta nueva
+} else {
+  app.whenReady().then(() => {
+    const displays = screen.getAllDisplays()
+    createWebSocketClient(displays)
+  })
+
+  app.on("second-instance", () => {
+    console.log("La aplicación ya está ejecutándose.")
+  })
+}
 
 function createWebSocketClient(displays) {
   const WS_URL = process.env.WS_CLIENT
   let reconnectInterval = 5000 // Tiempo de espera antes de intentar reconectar
   let reconnectTimeout
   
-  wsClient = new WebSocket(WS_URL)
-
   function connect() {
     wsClient = new WebSocket(WS_URL)
 
@@ -77,15 +86,7 @@ function createWebSocketClient(displays) {
     })
   }
 
-  let reconnectAttempts = 0
-  const maxReconnectAttempts = 10
-
   function scheduleReconnect() {
-    if (reconnectAttempts >= maxReconnectAttempts) {
-      console.error("Número máximo de intentos de reconexión alcanzado")
-      return
-    }
-    reconnectAttempts++
 
     reconnectTimeout = setTimeout(() => {
       console.log("Intentando reconectar WebSocket...")

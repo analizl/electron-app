@@ -2,6 +2,8 @@ const { app, BrowserWindow, screen } = require("electron")
 const WebSocket = require("ws")
 require('dotenv').config()
 const os = require("os")
+const express = require('express')
+const cors = require('cors')
 
 function getLocalIP() {
   const interfaces = os.networkInterfaces()
@@ -20,7 +22,27 @@ function getLocalIP() {
   return localIP
 }
 
-const userId = getLocalIP()
+const userId = os.hostname()
+
+const corsOrigins = process.env.CORS_ORIGINS?.split(',') || []
+
+function startLocalServer() {
+  const localApp = express()
+  const PORT = 4567
+
+  localApp.use(cors({
+    origin: corsOrigins
+  }))
+
+  localApp.get('/hostname', (req, res) => {
+    const hostname = os.hostname()
+    res.json({ userId: hostname })
+  })
+
+  localApp.listen(PORT, () => {
+    console.log(`API local escuchando en http://localhost:${PORT}`)
+  })
+}
 
 app.setLoginItemSettings({
   openAtLogin: true, // Inicia la app al inicio de windows
@@ -40,6 +62,7 @@ if (!gotTheLock) {
   app.whenReady().then(() => {
     const displays = screen.getAllDisplays()
     createWebSocketClient(displays)
+    startLocalServer()
   })
 
   app.on("second-instance", () => {
@@ -57,7 +80,7 @@ function createWebSocketClient(displays) {
 
     wsClient.on("open", () => {
       console.log("Conexión WebSocket abierta", userId)
-      wsClient.send(JSON.stringify({ action: "register", userId }))
+      wsClient.send(JSON.stringify({ action: "register", userId:userId }))
       clearTimeout(reconnectTimeout) // Si se reconectó, cancelar el intento de reconexión
     })
 

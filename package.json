@@ -10,9 +10,11 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "electron": "^34.2.0",
     "electron-packager": "^17.1.2",
+    "express": "^5.1.0",
     "ws": "^8.18.0"
   }
 }

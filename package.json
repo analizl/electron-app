@@ -12,9 +12,12 @@
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
-    "electron": "~> 35.7.5",
-    "electron-packager": "^17.1.2",
+    "electron": "^41.7.1",
+    "electron-packager": "^14.2.1",
     "express": "^5.1.0",
     "ws": "^8.18.0"
+  },
+  "overrides": {
+    "extract-zip": "^2.0.1"
   }
 }
